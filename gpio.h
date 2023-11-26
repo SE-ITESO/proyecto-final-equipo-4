@@ -1,38 +1,34 @@
 /*
- * pit.h
+ * gpio.h
  *
- *  Created on: 3 nov 2023
+ *  Created on: 01 nov 2023
  *      Author: Arlette Uribe & Pablo Ramos
  */
 
-#ifndef PIT_H_
-#define PIT_H_
-
+#ifndef GPIO_H_
+#define GPIO_H_
 
 /**************************************************************************************************************
  *                                               Included files
  **************************************************************************************************************/
 
-#include "fsl_pit.h"
-#include "fsl_common_arm.h"
-#include "MK64F12.h"
-
-/**************************************************************************************************************
- *                                                  Macros
- **************************************************************************************************************/
-
-#define PIT0_TIME 250u
-#define PITclock CLOCK_GetFreq(kCLOCK_BusClk)
+#include "stdint.h"
+#include "stdio.h"
+#include "fsl_clock.h"
+#include "fsl_port.h"
+#include "fsl_gpio.h"
+#include "config.h"
 
 /**************************************************************************************************************
  *                                             Functions declarations
  **************************************************************************************************************/
 
-void PIT_init();
+void GPIO_init(void);
 
-uint8_t PIT_status_flag(void);
+uint8_t GPIO_Get_irq_status(gpio_port_name_t gpio_port);
 
-void PIT_clear_status_flag(void);
+void GPIO_Clear_irq_status(gpio_port_name_t gpio_port);
 
+void GPIO_callback_init( void (*handler));
 
-#endif /* PIT_H_ */
+#endif /* GPIO_H_ */

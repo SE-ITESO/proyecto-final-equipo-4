@@ -27,7 +27,6 @@ void EDMA_Callback(edma_handle_t *handle, void *param, bool transferDone, uint32
     if (transferDone)
     {
         g_Transfer_Done = true;
-        PIT_StopTimer(PIT, kPIT_Chnl_0);
     }
 }
 
@@ -49,10 +48,6 @@ void DMA_config(uint16_t srcAddr[],uint16_t nbytes)
     EDMA_SetCallback(&g_EDMA_Handle, EDMA_Callback, NULL);
     EDMA_ResetChannel(g_EDMA_Handle.base, g_EDMA_Handle.channel);
 
-
-    if((nbytes % two) != 0){
-    	nbytes = nbytes - one;
-    }
 
     EDMA_PrepareTransferConfig(&transferConfig,
     		   &srcAddr[0],						/* srcAddr */

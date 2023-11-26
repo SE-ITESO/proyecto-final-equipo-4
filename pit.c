@@ -30,6 +30,7 @@ void PIT_init(void)
 	PIT_SetTimerPeriod(PIT, kPIT_Chnl_0, USEC_TO_COUNT(PIT0_TIME, PITclock));
 	PIT_EnableInterrupts(PIT, kPIT_Chnl_0, kPIT_TimerInterruptEnable);
 	EnableIRQ(PIT0_IRQn);
+	PIT_StartTimer(PIT, kPIT_Chnl_0);
 }
 
 uint8_t PIT_status_flag(void){
