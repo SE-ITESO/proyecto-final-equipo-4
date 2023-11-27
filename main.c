@@ -10,32 +10,32 @@
 #include <stdint.h>
 #include "MK64F12.h"
 #include "fsl_clock.h"
-#include "spi.h"
-#include "LCD_nokia.h"
-
-
-uint8_t ITESO[] = {
-		0xFF,0xFF,0xFF};
+#include "menu.h"
+#include "gpio.h"
+#include "nvic.h"
 
 int main(void) {
 
 	CLOCK_SetSimSafeDivs();
-
-	uint8_t string_1[] = "ITESO"; /*! String to be printed in the LCD*/
-	uint8_t string_2[] = "Sistemas"; /*! String to be printed in the LCD*/
-	uint8_t string_3[] = "Embebidos I"; /*! String to be printed in the LCD*/
-	uint8_t string_4[] = "IE"; /*! String to be printed in the LCD*/
+	GPIO_init();
 
 	LCD_nokia_init(); /*! Configuration function for the LCD */
-	LCD_nokia_clear();
+
+	MENU_init();
+
+	NVIC_set_basepri_threshold(PRIORITY_10);
+	NVIC_enable_interrupt_and_priotity(PORTA_IRQ, PRIORITY_5);
+	NVIC_enable_interrupt_and_priotity(PORTB_IRQ, PRIORITY_5);
+	NVIC_enable_interrupt_and_priotity(PORTC_IRQ, PRIORITY_5);
+	NVIC_enable_interrupt_and_priotity(PORTD_IRQ, PRIORITY_5);
+	NVIC_global_enable_interrupts;
 
     while(1) {
 
-    	LCD_nokia_write_byte(1,0x0F);
-		//LCD_nokia_bitmap(ITESO);
-		//LCD_nokia_goto_xy(20,0); /*! It establishes the position to print the messages in the LCD*/
-		//LCD_nokia_send_string(&string_1[0]); /*! It print a string stored in an array*/
-
+    	if(GPIO_Get_irq_status(GPIO_A)){
+    		MENU_SetSpeed();
+    		GPIO_Clear_irq_status(GPIO_A);
+    	}
 
     }
     return 0 ;
