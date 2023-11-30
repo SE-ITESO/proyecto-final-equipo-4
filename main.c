@@ -1,7 +1,8 @@
+
 #include "menu.h"
 #include "clock.h"
 #include "dac.h"
-
+#include "pit.h"
 
 int main(void) {
 
@@ -9,9 +10,8 @@ int main(void) {
 	GPIO_init();
 	CLK_config();
 	DAC_init(DAC0);
-	PIT0_init();
-
-	LCD_nokia_init();
+	PIT_init();
+	LCD_nokia_pin_config();
 	MENU_init();
 
 	NVIC_set_basepri_threshold(PRIORITY_10);
@@ -30,7 +30,10 @@ int main(void) {
 	GPIO_callback_init(MENU_flip2);
 
 	NVIC_global_enable_interrupts;
+
 	while(1){
+
+		MENU_state_machine();
 	}
     return 0 ;
 }

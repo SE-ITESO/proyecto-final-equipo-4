@@ -19,6 +19,19 @@ typedef struct {
 	uint8_t y;
 }XY_position_t;
 
+
+void MENU_game_settings(void);
+
+void MENU_SetLevel(void);
+
+void MENU_PrintLevel(uint8_t level);
+
+void MENU_print_game_over(void);
+
+void MENU_SetSpeed(void);
+
+void MENU_PrintSpeed(uint8_t speed);
+
 void MENU_init(void);
 
 void MENU_add_virus(uint8_t virus);
@@ -54,5 +67,13 @@ void MENU_track(uint32_t position, uint8_t pill);
 void MENU_track_virus(uint32_t position, uint8_t virus);
 
 void MENU_check_pill(void);
+
+void MENU_state_machine(void);
+
+void MENU_change_state(void);
+
+uint8_t MENU_return_flag(void);
+
+void MENU_startGame();
 
 #endif /* MENU_H_ */

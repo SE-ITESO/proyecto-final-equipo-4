@@ -29,7 +29,7 @@
  *                                             Functions declarations
  **************************************************************************************************************/
 
-void PIT0_init();
+void PIT_init();
 void PIT_callback_init( void (*handler));
 
 #endif /* PIT_H_ */

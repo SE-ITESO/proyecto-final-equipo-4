@@ -34,7 +34,7 @@ void PIT1_IRQHandler(void)
 	PIT_ClearStatusFlags(PIT, kPIT_Chnl_1, kPIT_TimerFlag);
 }
 
-void PIT0_init()
+void PIT_init()
 {
 	pit_config_t pitConfig;
 
@@ -50,5 +50,5 @@ void PIT0_init()
 	EnableIRQ(PIT0_IRQn);
 	EnableIRQ(PIT1_IRQn);
 	PIT_StartTimer(PIT, kPIT_Chnl_0);
-	PIT_StartTimer(PIT, kPIT_Chnl_1);
+	//PIT_StartTimer(PIT, kPIT_Chnl_1);
 }

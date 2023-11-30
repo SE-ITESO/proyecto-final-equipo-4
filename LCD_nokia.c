@@ -8,8 +8,6 @@
 #include "fsl_dspi.h"
 
 
-
-
 static const uint8_t ASCII[][5] =
 {
  {0x00, 0x00, 0x00, 0x00, 0x00} // 20
@@ -110,116 +108,189 @@ static const uint8_t ASCII[][5] =
 ,{0x78, 0x46, 0x41, 0x46, 0x78} // 7f
 };
 
-void LCD_nokia_init(void)
-{
+void LCD_nokia_pin_config(void){
+
 	CLOCK_EnableClock(kCLOCK_PortC);
+	CLOCK_EnableClock(kCLOCK_PortD);
 
 	gpio_pin_config_t gpio_output_config = {
 				        kGPIO_DigitalOutput,
 				        0,
 				    };
 
+	PORT_SetPinMux(PORTD, LCD1_CE, kPORT_MuxAlt2);
+	PORT_SetPinMux(PORTD, LCD_CLK, kPORT_MuxAlt2);
+	PORT_SetPinMux(PORTD, LCD_DIN, kPORT_MuxAlt2);
+	PORT_SetPinMux(PORTC, LCD2_CE, kPORT_MuxAlt2);
 
-	GPIO_PinInit(GPIOC, DATA_OR_CMD_PIN, &gpio_output_config);
-	PORT_SetPinMux(PORTC, DATA_OR_CMD_PIN, kPORT_MuxAsGpio);
+	GPIO_PinInit(GPIOC, LCD1_DATA_OR_CMD_PIN, &gpio_output_config);
+	PORT_SetPinMux(PORTC, LCD1_DATA_OR_CMD_PIN, kPORT_MuxAsGpio);
 
-	GPIO_PinInit(GPIOC, RESET_PIN, &gpio_output_config);
-	PORT_SetPinMux(PORTC, RESET_PIN, kPORT_MuxAsGpio);
+	GPIO_PinInit(GPIOC, LCD2_DATA_OR_CMD_PIN, &gpio_output_config);
+	PORT_SetPinMux(PORTC, LCD2_DATA_OR_CMD_PIN, kPORT_MuxAsGpio);
 
-	GPIO_PortClear(GPIOC, 1u << RESET_PIN);
-	LCD_nokia_delay();
-	GPIO_PortSet(GPIOC, 1u << RESET_PIN);
+	GPIO_PinInit(GPIOC, LCD1_RESET_PIN, &gpio_output_config);
+	PORT_SetPinMux(PORTC, LCD1_RESET_PIN, kPORT_MuxAsGpio);
 
+	GPIO_PinInit(GPIOC, LCD2_RESET_PIN, &gpio_output_config);
+	PORT_SetPinMux(PORTC, LCD2_RESET_PIN, kPORT_MuxAsGpio);
+}
+
+void LCD_nokia_init(LCD_t LDC_selected)
+{
 	SPI_config lcdConfig;
-
-	CLOCK_EnableClock(kCLOCK_PortD);
-	CLOCK_EnableClock(kCLOCK_PortC);
-
-	PORT_SetPinMux(PORTD, PIN0_IDX, kPORT_MuxAlt2);
-	PORT_SetPinMux(PORTD, PIN1_IDX, kPORT_MuxAlt2);
-	PORT_SetPinMux(PORTD, PIN2_IDX, kPORT_MuxAlt2);
-	PORT_SetPinMux(PORTD, PIN3_IDX, kPORT_MuxAlt2);
 
 	lcdConfig.baudrate = LCD_TRANSFER_BAUDRATE;
 	lcdConfig.bitframe = LCD_TRANSFER_SIZE;
 	lcdConfig.cpha = kDSPI_ClockPhaseFirstEdge;
 	lcdConfig.cpol = kDSPI_ClockPolarityActiveHigh;
-	lcdConfig.ctar = kDSPI_Ctar0;
-	lcdConfig.pcs = kDSPI_Pcs0;
 
-	SPI0_config(&lcdConfig);
+	if(LCD_game == LDC_selected ){
 
-	LCD_nokia_write_byte(LCD_CMD, 0x21); //Tell LCD that extended commands follow
-	LCD_nokia_write_byte(LCD_CMD, 0xBF); //Set LCD Vop (Contrast): Try 0xB1(good @ 3.3V) or 0xBF if your display is too dark
-	LCD_nokia_write_byte(LCD_CMD, 0x04); //Set Temp coefficent
-	LCD_nokia_write_byte(LCD_CMD, 0x14); //LCD bias mode 1:48: Try 0x13 or 0x14
+		GPIO_PortClear(GPIOC, 1u << LCD1_RESET_PIN);
+		LCD_nokia_delay();
+		GPIO_PortSet(GPIOC, 1u << LCD1_RESET_PIN);
 
-	LCD_nokia_write_byte(LCD_CMD, 0x20); //We must send 0x20 before modifying the display control mode
-	LCD_nokia_write_byte(LCD_CMD, 0x0C); //Set display control, normal mode. 0x0D for inverse
+		lcdConfig.ctar = kDSPI_Ctar0;
+		lcdConfig.pcs = kDSPI_Pcs0;
 
+		SPI0_config(&lcdConfig);
+
+		LCD_nokia_write_byte(LCD_CMD, 0x21,LCD_game ); //Tell LCD that extended commands follow
+		LCD_nokia_write_byte(LCD_CMD, 0xBF, LCD_game); //Set LCD Vop (Contrast): Try 0xB1(good @ 3.3V) or 0xBF if your display is too dark
+		LCD_nokia_write_byte(LCD_CMD, 0x04, LCD_game); //Set Temp coefficent
+		LCD_nokia_write_byte(LCD_CMD, 0x14, LCD_game); //LCD bias mode 1:48: Try 0x13 or 0x14
+
+		LCD_nokia_write_byte(LCD_CMD, 0x20, LCD_game); //We must send 0x20 before modifying the display control mode
+		LCD_nokia_write_byte(LCD_CMD, 0x0C, LCD_game); //Set display control, normal mode. 0x0D for inverse
+	}
+	else{
+
+		GPIO_PortClear(GPIOC, 1u << LCD2_RESET_PIN);
+		LCD_nokia_delay();
+		GPIO_PortSet(GPIOC, 1u << LCD2_RESET_PIN);
+
+		lcdConfig.ctar = kDSPI_Ctar1;
+		lcdConfig.pcs = kDSPI_Pcs1;
+
+		SPI0_config(&lcdConfig);
+
+		LCD_nokia_write_byte(LCD_CMD, 0x21, LCD_menu); //Tell LCD that extended commands follow
+		LCD_nokia_write_byte(LCD_CMD, 0xBF, LCD_menu); //Set LCD Vop (Contrast): Try 0xB1(good @ 3.3V) or 0xBF if your display is too dark
+		LCD_nokia_write_byte(LCD_CMD, 0x04, LCD_menu); //Set Temp coefficent
+		LCD_nokia_write_byte(LCD_CMD, 0x14, LCD_menu); //LCD bias mode 1:48: Try 0x13 or 0x14
+
+		LCD_nokia_write_byte(LCD_CMD, 0x20, LCD_menu); //We must send 0x20 before modifying the display control mode
+		LCD_nokia_write_byte(LCD_CMD, 0x0C, LCD_menu); //Set display control, normal mode. 0x0D for inverse
+	}
 }
 
-void LCD_nokia_bitmap(const uint8_t bitmap[]){
+void LCD_nokia_bitmap(const uint8_t bitmap[], LCD_t LDC_selected ){
 
-
-   GPIO_PortSet(GPIOC, 1u << DATA_OR_CMD_PIN);
-
-   dspi_transfer_t masterXfer;
-	masterXfer.txData      =(uint8_t *) bitmap;
-	masterXfer.rxData      = NULL;
-	masterXfer.dataSize    = 504;
-	masterXfer.configFlags = kDSPI_MasterCtar0 | kDSPI_MasterPcs0 | kDSPI_MasterPcsContinuous;
-	DSPI_MasterTransferBlocking(SPI0, &masterXfer);
-
-}
-
-
-
-void LCD_nokia_write_byte(uint8_t data_or_command, uint8_t data)
-{
 	dspi_transfer_t masterXfer;
 
-	if(data_or_command)
-		GPIO_PortSet(GPIOC, 1u << DATA_OR_CMD_PIN);
-	else
-		GPIO_PortClear(GPIOC, 1u << DATA_OR_CMD_PIN);
+	if(LCD_game == LDC_selected){
+		GPIO_PortSet(GPIOC, 1u << LCD1_DATA_OR_CMD_PIN);
+		masterXfer.configFlags = kDSPI_MasterCtar0 | kDSPI_MasterPcs0 | kDSPI_MasterPcsContinuous;
+	}
+	else{
+		GPIO_PortSet(GPIOC, 1u << LCD2_DATA_OR_CMD_PIN);
+		masterXfer.configFlags = kDSPI_MasterCtar1 | kDSPI_MasterPcs1 | kDSPI_MasterPcsContinuous;
+	}
+
+	masterXfer.txData      =(uint8_t *) bitmap;
+	masterXfer.rxData      = NULL;
+	masterXfer.dataSize    = DATA_SIZE;
+
+	DSPI_MasterTransferBlocking(SPI0, &masterXfer);
+}
+
+
+void LCD_nokia_write_byte(uint8_t data_or_command, uint8_t data,LCD_t LDC_selected){
+
+	dspi_transfer_t masterXfer;
+
+	if(LCD_game == LDC_selected){
+		if(data_or_command)
+			GPIO_PortSet(GPIOC, 1u << LCD1_DATA_OR_CMD_PIN);
+		else
+			GPIO_PortClear(GPIOC, 1u << LCD1_DATA_OR_CMD_PIN);
+
+		masterXfer.configFlags = kDSPI_MasterCtar0 | kDSPI_MasterPcs0 | kDSPI_MasterPcsContinuous;
+	}
+	else{
+		if(data_or_command)
+			GPIO_PortSet(GPIOC, 1u << LCD2_DATA_OR_CMD_PIN);
+		else
+			GPIO_PortClear(GPIOC, 1u << LCD2_DATA_OR_CMD_PIN);
+
+		masterXfer.configFlags = kDSPI_MasterCtar1 | kDSPI_MasterPcs1 | kDSPI_MasterPcsContinuous;
+	}
 
 	/* Start master transfer, send data to slave */
 	masterXfer.txData      = &data;
 	masterXfer.rxData      = NULL;
 	masterXfer.dataSize    = 1;
-	masterXfer.configFlags = kDSPI_MasterCtar0 | kDSPI_MasterPcs0 | kDSPI_MasterPcsContinuous;
+
 	DSPI_MasterTransferBlocking(SPI0, &masterXfer);
-
 }
 
-void LCD_nokia_send_char(uint8_t character) {
-  uint16_t index = 0;
+void LCD_nokia_send_char(uint8_t character, LCD_t LDC_selected){
 
-  LCD_nokia_write_byte(LCD_DATA, 0x00); //Blank vertical line padding
-
-  for (index = 0 ; index < 5 ; index++)
-	  LCD_nokia_write_byte(LCD_DATA, ASCII[character - 0x20][index]);
-    //0x20 is the ASCII character for Space (' '). The font table starts with this character
-
-  LCD_nokia_write_byte(LCD_DATA, 0x00); //Blank vertical line padding
-}
-
-void LCD_nokia_send_string(uint8_t characters []) {
-  while (*characters)
-	  LCD_nokia_send_char(*characters++);
-}
-
-void LCD_nokia_clear(void) {
 	uint16_t index = 0;
-  for (index = 0 ; index < (LCD_X * LCD_Y / 8) ; index++)
-	  LCD_nokia_write_byte(LCD_DATA, 0x00);
-  LCD_nokia_goto_xy(0, 0); //After we clear the display, return to the home position
+
+	if(LCD_game == LDC_selected){
+		LCD_nokia_write_byte(LCD_DATA, 0x00, LCD_game); //Blank vertical line padding
+		for (index = 0 ; index < 5 ; index++)
+			LCD_nokia_write_byte(LCD_DATA, ASCII[character - 0x20][index],LCD_game);
+			//0x20 is the ASCII character for Space (' '). The font table starts with this character
+		LCD_nokia_write_byte(LCD_DATA, 0x00,LCD_game); //Blank vertical line padding
+	}
+	else{
+		LCD_nokia_write_byte(LCD_DATA, 0x00, LCD_menu); //Blank vertical line padding
+		for (index = 0 ; index < 5 ; index++)
+			LCD_nokia_write_byte(LCD_DATA, ASCII[character - 0x20][index],LCD_menu);
+			//0x20 is the ASCII character for Space (' '). The font table starts with this character
+		LCD_nokia_write_byte(LCD_DATA, 0x00,LCD_menu); //Blank vertical line padding
+	}
 }
 
-void LCD_nokia_goto_xy(uint8_t x, uint8_t y) {
-	LCD_nokia_write_byte(LCD_CMD, 0x80 | x);  // Column.
-	LCD_nokia_write_byte(LCD_CMD, 0x40 | y);  // Row.  ?
+void LCD_nokia_send_string(uint8_t characters [],LCD_t LDC_selected){
+	if(LCD_game == LDC_selected){
+		  while (*characters)
+			  LCD_nokia_send_char(*characters++,LCD_game);
+	}
+	else{
+		  while (*characters)
+			  LCD_nokia_send_char(*characters++,LCD_menu);
+	}
+}
+
+void LCD_nokia_clear(LCD_t LDC_selected){
+
+	uint16_t index = 0;
+	if(LCD_game == LDC_selected){
+		for (index = 0 ; index < (LCD_X * LCD_Y / 8) ; index++)
+			LCD_nokia_write_byte(LCD_DATA, 0x00, LCD_game);
+		LCD_nokia_goto_xy(0, 0,LCD_game); //After we clear the display, return to the home position
+	}
+	else{
+		for (index = 0 ; index < (LCD_X * LCD_Y / 8) ; index++)
+			LCD_nokia_write_byte(LCD_DATA, 0x00, LCD_menu);
+		LCD_nokia_goto_xy(0, 0,LCD_menu); //After we clear the display, return to the home position
+	}
+}
+
+void LCD_nokia_goto_xy(uint8_t x, uint8_t y,LCD_t LDC_selected){
+	if(LCD_game == LDC_selected){
+		LCD_nokia_write_byte(LCD_CMD, 0x80 | x, LCD_game);  // Column.
+		LCD_nokia_write_byte(LCD_CMD, 0x40 | y, LCD_game);  // Row.  ?
+	}
+	else{
+		LCD_nokia_write_byte(LCD_CMD, 0x80 | x, LCD_menu);  // Column.
+		LCD_nokia_write_byte(LCD_CMD, 0x40 | y, LCD_menu);  // Row.  ?
+	}
+
 }
 
 void LCD_nokia_delay(void)

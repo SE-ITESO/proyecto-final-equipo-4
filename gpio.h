@@ -18,6 +18,8 @@
 #include "fsl_port.h"
 #include "fsl_gpio.h"
 
+#include "menu.h"
+
 /**************************************************************************************************************
  *                                                   Macros
  **************************************************************************************************************/
@@ -66,6 +68,6 @@ uint8_t GPIO_Get_irq_status(gpio_port_name_t gpio_port);
 
 void GPIO_Clear_irq_status(gpio_port_name_t gpio_port);
 
-void GPIO_callback_init( void (*handler));
+void GPIO_callback_init(void (*handler));
 
 #endif /* GPIO_H_ */

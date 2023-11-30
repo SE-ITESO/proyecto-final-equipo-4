@@ -17,12 +17,13 @@ static void (*gpioA_callback) (void)= FALSE;
 static void (*gpioB_callback) (void)= FALSE;
 static void (*gpioC_callback) (void)= FALSE;
 static void (*gpioD_callback) (void)= FALSE;
+
 /**************************************************************************************************************
  *                                            Functions definitions
  **************************************************************************************************************/
-void GPIO_callback_init( void (*handler))
+void GPIO_callback_init(void (*handler))
 {
-	if(FALSE == gpioA_callback ){
+	if(FALSE == gpioA_callback){
 		gpioA_callback = handler;
 	}else if(FALSE == gpioB_callback ){
 		gpioB_callback = handler;
@@ -34,7 +35,9 @@ void GPIO_callback_init( void (*handler))
 }
 void PORTA_IRQHandler(void)
 {
-	if(gpioA_callback){
+	static uint8_t flag = 0;
+	flag = MENU_return_flag();
+	if(gpioA_callback && flag){
 		gpioA_callback();
 	}
 	g_intr_status_flag.flag_port_a = true;
@@ -43,7 +46,9 @@ void PORTA_IRQHandler(void)
 
 void PORTB_IRQHandler(void)
 {
-	if(gpioB_callback){
+	static uint8_t flag = 0;
+	flag = MENU_return_flag();
+	if(gpioB_callback && flag){
 		gpioB_callback();
 	}
 	g_intr_status_flag.flag_port_b = true;
@@ -52,7 +57,9 @@ void PORTB_IRQHandler(void)
 
 void PORTC_IRQHandler(void)
 {
-	if(gpioC_callback ){
+	static uint8_t flag = 0;
+	flag = MENU_return_flag();
+	if(gpioC_callback && flag){
 		gpioC_callback();
 	}
 	g_intr_status_flag.flag_port_c = true;
@@ -61,9 +68,12 @@ void PORTC_IRQHandler(void)
 
 void PORTD_IRQHandler(void)
 {
-	if(gpioD_callback ){
+	static uint8_t flag = 0;
+	flag = MENU_return_flag();
+	if(gpioD_callback && flag ){
 		gpioD_callback();
 	}
+	g_intr_status_flag.flag_port_d = true;
 	GPIO_PortClearInterruptFlags(GPIOD, 0xFFFFFFF);
 }
 
