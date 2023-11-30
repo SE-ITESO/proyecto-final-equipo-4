@@ -33,7 +33,7 @@ int main(void) {
     while(1) {
 
     	if(GPIO_Get_irq_status(GPIO_A)){
-    		MENU_SetSpeed();
+    		MENU_PrintGame();
     		GPIO_Clear_irq_status(GPIO_A);
     	}
 

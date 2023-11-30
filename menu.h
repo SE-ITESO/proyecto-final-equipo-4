@@ -14,6 +14,8 @@
 
 void MENU_init(void);
 
+void MENU_PrintGame(void);
+
 void MENU_SetLevel(void);
 
 void MENU_SetSpeed(void);
